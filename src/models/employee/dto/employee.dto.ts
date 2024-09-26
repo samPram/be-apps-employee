@@ -19,6 +19,10 @@ export class EmployeeDto {
 
   @IsString()
   @IsNotEmpty()
+  position: string;
+
+  @IsString()
+  @IsNotEmpty()
   department: string;
 
   @IsDateString()

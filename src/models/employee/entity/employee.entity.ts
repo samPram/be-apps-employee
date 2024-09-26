@@ -21,6 +21,10 @@ export class EmployeeEntity {
   @Column('int', { width: 10, nullable: false, unique: true })
   number: number;
 
+  @Index('idx_employee_position')
+  @Column('varchar', { length: 225, nullable: false })
+  position: string;
+
   @Column('varchar', { length: 50, nullable: false })
   department: string;
 

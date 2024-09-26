@@ -5,6 +5,7 @@ import { InjectRepository } from '@nestjs/typeorm';
 import { EmployeeEntity } from './entity/employee.entity';
 import { QueryFailedError, Repository } from 'typeorm';
 import { QueryDto } from './dto/query.dto';
+import { parse } from 'csv-parse';
 
 @Injectable()
 export class EmployeeService {
@@ -34,7 +35,14 @@ export class EmployeeService {
         .take(options.limit)
         .getManyAndCount();
 
-      return { data, count };
+      const totalPages = Math.ceil(count / options.limit);
+
+      return {
+        items: data,
+        totalItems: count,
+        currentPage: options?.page,
+        totalPages,
+      };
     } catch (error) {
       console.log(error);
 
@@ -131,6 +139,57 @@ export class EmployeeService {
       if (error instanceof HttpException) {
         throw error;
       }
+
+      throw new HttpException(
+        'Internal server error!',
+        HttpStatus.INTERNAL_SERVER_ERROR,
+      );
+    }
+  }
+
+  //   insert from csv
+  async insertFromCsv(file: Express.Multer.File) {
+    try {
+      const fails: any[] = [];
+      const inserted: any[] = [];
+      const data_parser: any[] = await new Promise((resolve, reject) => {
+        parse(file.buffer, { columns: true }, (err, data) => {
+          if (err) {
+            reject(err);
+          } else {
+            resolve(data);
+          }
+        });
+      });
+
+      for (const element of data_parser) {
+        const exist = await this.employeeRepository.findOne({
+          where: { number: element?.nomor },
+        });
+
+        if (!exist) {
+          await this.employeeRepository.insert({
+            name: element?.nama,
+            number: element?.nomor,
+            position: element.jabatan,
+            department: element?.departmen,
+            joined: element?.tanggal_masuk,
+            photo: element?.foto,
+            status: element?.status,
+          });
+
+          inserted.push(element);
+        } else {
+          fails.push(element);
+        }
+      }
+
+      return {
+        inserted: { data: inserted, count: inserted.length },
+        existing: { data: fails, count: fails.length },
+      };
+    } catch (error) {
+      console.log(error);
 
       throw new HttpException(
         'Internal server error!',

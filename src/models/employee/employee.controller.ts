@@ -82,4 +82,12 @@ export class EmployeeController {
   async removeUploadPhoto(@Param('public_id') public_id: string) {
     return await this.cloudinaryService.removeFile(public_id);
   }
+
+  // Import file csv employee
+  @Post('/import/csv')
+  @HttpCode(200)
+  @UseInterceptors(FileInterceptor('file'))
+  async uploadCsv(@UploadedFile() file: Express.Multer.File) {
+    return await this.employeeService.insertFromCsv(file);
+  }
 }
