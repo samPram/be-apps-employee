@@ -52,7 +52,7 @@ export class EmployeeController {
 
   //   Delete
   @Delete(':id')
-  async deleteById(@Param('id') id: string) {
+  async deleteById(@Param('id', ParseUUIDPipe) id: string) {
     return await this.employeeService.deleteById(id);
   }
 }

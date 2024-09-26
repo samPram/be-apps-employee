@@ -73,11 +73,21 @@ export class EmployeeService {
   // update by id
   async updateById(id: string, data: UpdateEmployeeDto) {
     try {
+      const data = await this.employeeRepository.findOne({ where: { id } });
+
+      if (!data) {
+        throw new HttpException('Data not found!', HttpStatus.NOT_FOUND);
+      }
+
       await this.employeeRepository.update(id, data);
 
       return { id: id };
     } catch (error) {
       console.log(error);
+
+      if (error instanceof HttpException) {
+        throw error;
+      }
 
       throw new HttpException(
         'Internal server error!',
@@ -89,11 +99,21 @@ export class EmployeeService {
   //   delete by id
   async deleteById(id: string) {
     try {
+      const data = await this.employeeRepository.findOne({ where: { id } });
+
+      if (!data) {
+        throw new HttpException('Data not found!', HttpStatus.NOT_FOUND);
+      }
+
       await this.employeeRepository.delete(id);
 
       return `Deleted ${id}`;
     } catch (error) {
       console.log(error);
+
+      if (error instanceof HttpException) {
+        throw error;
+      }
 
       throw new HttpException(
         'Internal server error!',
