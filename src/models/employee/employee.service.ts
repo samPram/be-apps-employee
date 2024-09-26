@@ -71,7 +71,7 @@ export class EmployeeService {
   }
 
   // update by id
-  async updateById(id: string, data: UpdateEmployeeDto) {
+  async updateById(id: string, body: UpdateEmployeeDto) {
     try {
       const data = await this.employeeRepository.findOne({ where: { id } });
 
@@ -79,7 +79,7 @@ export class EmployeeService {
         throw new HttpException('Data not found!', HttpStatus.NOT_FOUND);
       }
 
-      await this.employeeRepository.update(id, data);
+      await this.employeeRepository.update(id, body);
 
       return { id: id };
     } catch (error) {

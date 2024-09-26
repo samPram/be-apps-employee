@@ -9,17 +9,23 @@ import {
   Patch,
   Post,
   Query,
+  UploadedFile,
   UseInterceptors,
 } from '@nestjs/common';
 import { EmployeeDto } from './dto/employee.dto';
 import { EmployeeService } from './employee.service';
 import { UpdateEmployeeDto } from './dto/update.dto';
 import { ResponseInterceptor } from 'src/common/interceptors/response.interceptor';
+import { FileInterceptor } from '@nestjs/platform-express';
+import { CloudinaryService } from 'src/providers/cloudinary/cloudinary.service';
 
 @Controller('employee')
 @UseInterceptors(ResponseInterceptor)
 export class EmployeeController {
-  constructor(private readonly employeeService: EmployeeService) {}
+  constructor(
+    private readonly employeeService: EmployeeService,
+    private readonly cloudinaryService: CloudinaryService,
+  ) {}
 
   // Get
   @Get()
@@ -54,5 +60,20 @@ export class EmployeeController {
   @Delete(':id')
   async deleteById(@Param('id', ParseUUIDPipe) id: string) {
     return await this.employeeService.deleteById(id);
+  }
+
+  //   Upload image photo
+  @Post('/upload/image')
+  @HttpCode(200)
+  @UseInterceptors(FileInterceptor('file'))
+  async uploadPhoto(@UploadedFile() file: Express.Multer.File) {
+    const upload = await this.cloudinaryService.uploadFile(file);
+    return { public_id: upload.public_id, url: upload.url };
+  }
+
+  //   Remove Upload image photo
+  @Delete('/upload/image/remove/:public_id')
+  async removeUploadPhoto(@Param('public_id') public_id: string) {
+    return await this.cloudinaryService.removeFile(public_id);
   }
 }
