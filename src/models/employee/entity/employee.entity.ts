@@ -18,7 +18,7 @@ export class EmployeeEntity {
   name: string;
 
   @Index('idx_employee_number')
-  @Column('int', { width: 10, nullable: false })
+  @Column('int', { width: 10, nullable: false, unique: true })
   number: number;
 
   @Column('varchar', { length: 50, nullable: false })

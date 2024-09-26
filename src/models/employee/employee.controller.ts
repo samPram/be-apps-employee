@@ -5,6 +5,7 @@ import {
   Get,
   HttpCode,
   Param,
+  ParseUUIDPipe,
   Patch,
   Post,
   Query,
@@ -28,7 +29,7 @@ export class EmployeeController {
 
   //   Get One by ID
   @Get(':id')
-  async getById(@Param('id') id: string) {
+  async getById(@Param('id', ParseUUIDPipe) id: string) {
     return await this.employeeService.findById(id);
   }
 
@@ -41,7 +42,11 @@ export class EmployeeController {
 
   //   Update
   @Patch(':id')
-  async patch(@Param('id') id: string, @Body() data: UpdateEmployeeDto) {
+  //   @HttpCode(200)
+  async patch(
+    @Param('id', ParseUUIDPipe) id: string,
+    @Body() data: UpdateEmployeeDto,
+  ) {
     return await this.employeeService.updateById(id, data);
   }
 
