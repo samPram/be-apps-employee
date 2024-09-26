@@ -1,0 +1,46 @@
+services:
+  postgres:
+    container_name: pg_employee
+    image: postgres
+    environment:
+      POSTGRES_USER: ${POSTGRES_USER:-postgres}
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD:-password}
+      PGDATA: /data/pg_employee
+    volumes:
+      - pg_employee:/data/pg_employee
+    ports:
+      - 5432:5432
+    restart: unless-stopped
+    networks:
+      - public
+
+  # auth-service:
+  #   build:
+  #     args:
+  #       - NODE_ENV=development
+  #     context: ./be-apps-auth
+  #   ports:
+  #     - 4000:4000 # Replace with desired external port
+  #   depends_on:
+  #     - postgres
+  #   volumes:
+  #     - ./be-apps-auth:/usr/src/app # Optional: Mount project directory for development
+  #   environment:
+  #     - PORT=4000
+  #     - PG_PORT=5432
+  #     - PG_HOST=postgres
+  #     - PG_USER=${POSTGRES_USER:-postgres}
+  #     - PG_PASS=${POSTGRES_PASSWORD:-password}
+  #     - PG_DB=postgres
+  #     - JWT_SECRET=secret
+  #   networks:
+  #     - public
+
+volumes:
+  # auth-service_volume: # Optional: Persistent volume for auth service data (if needed)
+  # logistic-service_volume:
+  pg_employee:
+
+networks:
+  public:
+    driver: bridge
