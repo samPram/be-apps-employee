@@ -4,6 +4,7 @@ import { UpdateEmployeeDto } from './dto/update.dto';
 import { InjectRepository } from '@nestjs/typeorm';
 import { EmployeeEntity } from './entity/employee.entity';
 import { QueryFailedError, Repository } from 'typeorm';
+import { QueryDto } from './dto/query.dto';
 
 @Injectable()
 export class EmployeeService {
@@ -13,11 +14,27 @@ export class EmployeeService {
   ) {}
 
   //   find all
-  async findAll(options?: any) {
+  async findAll(options: QueryDto) {
     try {
-      const data = await this.employeeRepository.find();
+      const query_builder =
+        this.employeeRepository.createQueryBuilder('employee');
 
-      return data;
+      if (options.search) {
+        query_builder.where(`employee.name iLIKE :search`, {
+          search: `%${options.search}%`,
+        });
+      }
+
+      if (options.column && options.order) {
+        query_builder.orderBy(options.column, options.order);
+      }
+
+      const [data, count] = await query_builder
+        .skip((options.page - 1) * options.limit)
+        .take(options.limit)
+        .getManyAndCount();
+
+      return { data, count };
     } catch (error) {
       console.log(error);
 

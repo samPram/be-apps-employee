@@ -18,6 +18,7 @@ import { UpdateEmployeeDto } from './dto/update.dto';
 import { ResponseInterceptor } from 'src/common/interceptors/response.interceptor';
 import { FileInterceptor } from '@nestjs/platform-express';
 import { CloudinaryService } from 'src/providers/cloudinary/cloudinary.service';
+import { QueryDto } from './dto/query.dto';
 
 @Controller('employee')
 @UseInterceptors(ResponseInterceptor)
@@ -29,7 +30,12 @@ export class EmployeeController {
 
   // Get
   @Get()
-  async getAll(@Query() query: any) {
+  async getAll(@Query() query: QueryDto) {
+    if (!query.page || !query.limit) {
+      query['page'] = 1;
+      query['limit'] = 5;
+    }
+
     return await this.employeeService.findAll(query);
   }
 
