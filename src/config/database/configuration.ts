@@ -11,7 +11,7 @@ export default registerAs('postgres', () => ({
   entities: [__dirname + '/../../**/*.entity{.ts,.js}'],
   migrations: [__dirname + '/../../database/migrations/*{.ts,.js}'],
   migrationsTableName: 'migration_table',
-  synchronize: true, // don't use when prod
+  synchronize: process.env.NODE_ENV == 'production' ? false : true, // don't use when prod
   logging: true,
   cli: {
     migrationsDir: 'src/database/migrations', // This path will be used by typeorm cli when we create a new migration

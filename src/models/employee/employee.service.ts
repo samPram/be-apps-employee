@@ -16,7 +16,7 @@ export class EmployeeService {
   ) {}
 
   //   find all
-  async findAll(options: QueryDto) {
+  async findAll(options?: QueryDto): Promise<any> {
     try {
       const query_builder =
         this.employeeRepository.createQueryBuilder('employee');
