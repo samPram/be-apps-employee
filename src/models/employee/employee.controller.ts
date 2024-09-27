@@ -9,6 +9,7 @@ import {
   Patch,
   Post,
   Query,
+  Res,
   UploadedFile,
   UseInterceptors,
 } from '@nestjs/common';
@@ -19,6 +20,7 @@ import { ResponseInterceptor } from 'src/common/interceptors/response.intercepto
 import { FileInterceptor } from '@nestjs/platform-express';
 import { CloudinaryService } from 'src/providers/cloudinary/cloudinary.service';
 import { QueryDto } from './dto/query.dto';
+import { Response } from 'express';
 
 @Controller('employee')
 @UseInterceptors(ResponseInterceptor)
@@ -89,5 +91,25 @@ export class EmployeeController {
   @UseInterceptors(FileInterceptor('file'))
   async uploadCsv(@UploadedFile() file: Express.Multer.File) {
     return await this.employeeService.insertFromCsv(file);
+  }
+
+  // Export PDF
+  @Get('/export/pdf')
+  async exportPdf(@Res() res: Response) {
+    const pdf_buffer = await this.employeeService.exportPdf();
+    res.setHeader('Content-Type', 'application/pdf');
+    res.setHeader('Content-Disposition', 'attachment; filename=employee.pdf');
+    res.setHeader('Content-Length', 'buffer.length');
+    res.send(pdf_buffer);
+  }
+
+  // Export CSV
+  @Get('/export/csv')
+  async exportCsv(@Res() res: Response) {
+    const csv_string = await this.employeeService.exportCsv();
+    res.setHeader('Content-Type', 'text/csv; charset=utf-8');
+    res.setHeader('Content-Disposition', 'attachment; filename=employee.csv');
+
+    res.send(csv_string);
   }
 }

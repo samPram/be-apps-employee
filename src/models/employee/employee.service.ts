@@ -6,6 +6,7 @@ import { EmployeeEntity } from './entity/employee.entity';
 import { QueryFailedError, Repository } from 'typeorm';
 import { QueryDto } from './dto/query.dto';
 import { parse } from 'csv-parse';
+import * as PDFDocument from 'pdfkit';
 
 @Injectable()
 export class EmployeeService {
@@ -191,6 +192,88 @@ export class EmployeeService {
     } catch (error) {
       console.log(error);
 
+      throw new HttpException(
+        'Internal server error!',
+        HttpStatus.INTERNAL_SERVER_ERROR,
+      );
+    }
+  }
+
+  //   export pdf
+  async exportPdf(): Promise<Buffer> {
+    try {
+      const data = await this.employeeRepository.find();
+
+      const pdf_buffer: Buffer = await new Promise((resolve) => {
+        const doc = new PDFDocument({
+          size: 'LETTER',
+          bufferPages: true,
+        });
+
+        doc.text(`Data Employee`, { align: 'center' });
+        // content
+        for (const emp of data) {
+          doc.text(`Nomor: ${emp.number}`, { align: 'left' });
+          doc.text(`Nama: ${emp.name}`, { align: 'left' });
+          doc.text(`Jabatan: ${emp.position}`, { align: 'left' });
+          doc.text(`Depratmen: ${emp.department}`, { align: 'left' });
+          doc.text(`Tanggal Masuk: ${emp.joined}`, { align: 'left' });
+          doc.text(`Foto: ${emp.photo}`, { align: 'left' });
+          doc.text(`Status: ${emp.status}`, { align: 'left' });
+
+          doc.text('\n').moveDown();
+        }
+
+        doc.end();
+
+        const buffer = [];
+        doc.on('data', buffer.push.bind(buffer));
+        doc.on('end', () => {
+          const data = Buffer.concat(buffer);
+          resolve(data);
+        });
+      });
+
+      return pdf_buffer;
+    } catch (error) {
+      throw new HttpException(
+        'Internal server error!',
+        HttpStatus.INTERNAL_SERVER_ERROR,
+      );
+    }
+  }
+
+  // export csv
+  async exportCsv(): Promise<string> {
+    try {
+      const data = await this.employeeRepository.find();
+
+      let csv_string =
+        [
+          'nama',
+          'nomor',
+          'jabatan',
+          'departmen',
+          'tanggal_masuk',
+          'foto',
+          'status',
+        ].join(',') + '\r\n';
+
+      for (const emp of data) {
+        csv_string +=
+          [
+            emp.name,
+            emp.number,
+            emp.position,
+            emp.department,
+            emp.joined,
+            emp.photo,
+            emp.status,
+          ].join(',') + '\r\n';
+      }
+
+      return csv_string;
+    } catch (error) {
       throw new HttpException(
         'Internal server error!',
         HttpStatus.INTERNAL_SERVER_ERROR,
