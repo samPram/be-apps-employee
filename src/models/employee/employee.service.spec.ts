@@ -3,22 +3,32 @@ import { EmployeeService } from './employee.service';
 import { Repository } from 'typeorm';
 import { EmployeeEntity } from './entity/employee.entity';
 import { TypeORMPgTestingModule } from 'test/connection/connection';
-import { TypeOrmModule } from '@nestjs/typeorm';
+import { getRepositoryToken, TypeOrmModule } from '@nestjs/typeorm';
 
 describe('EmployeeService', () => {
   let service: EmployeeService;
   let employeeRepo: Repository<EmployeeEntity>;
 
+  const mockRepo = {
+    find: jest.fn(),
+  };
+
   beforeEach(async () => {
     const module: TestingModule = await Test.createTestingModule({
       providers: [
         EmployeeService,
-        { provide: 'EmployeeRepo', useValue: { find: jest.fn() } },
+        {
+          provide: getRepositoryToken(EmployeeEntity),
+          useValue: mockRepo,
+        },
+        ,
       ],
     }).compile();
 
     service = module.get<EmployeeService>(EmployeeService);
-    employeeRepo = module.get<Repository<EmployeeEntity>>('EmployeeRepo');
+    employeeRepo = module.get<Repository<EmployeeEntity>>(
+      getRepositoryToken(EmployeeEntity),
+    );
   });
 
   it('should be defined', () => {
@@ -26,7 +36,7 @@ describe('EmployeeService', () => {
   });
 
   // get all
-  describe('getAll', () => {
+  describe('find', () => {
     it('should return an array of employee', async () => {
       const result = [
         {
@@ -86,14 +96,22 @@ describe('EmployeeService', () => {
           deleted_at: null,
         },
       ];
-      jest.spyOn(service, 'findAll').mockImplementation(async () => ({
+      // jest.spyOn(service, 'findAll').mockImplementation(async () => ({
+      //   items: result,
+      //   totalItems: 4,
+      //   currentPage: '1',
+      //   totalPages: 1,
+      // }));
+      mockRepo.find.mockResolvedValue(result);
+
+      const employees = await service.findAll();
+
+      expect(employees).toEqual({
         items: result,
         totalItems: 4,
         currentPage: '1',
         totalPages: 1,
-      }));
-
-      expect(await service.findAll()).toBe(result);
+      });
     });
   });
 });

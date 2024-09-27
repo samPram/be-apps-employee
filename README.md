@@ -10,6 +10,8 @@ Be apps employee for management employee data using framework [Nest](https://git
 
 ## Pre-required
 
+- Setup Cloudinary account
+
 With Docker
 
 - Docker
