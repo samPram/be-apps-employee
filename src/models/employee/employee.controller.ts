@@ -16,9 +16,9 @@ import {
 import { EmployeeDto } from './dto/employee.dto';
 import { EmployeeService } from './employee.service';
 import { UpdateEmployeeDto } from './dto/update.dto';
-import { ResponseInterceptor } from 'src/common/interceptors/response.interceptor';
+import { ResponseInterceptor } from '../../common/interceptors/response.interceptor';
 import { FileInterceptor } from '@nestjs/platform-express';
-import { CloudinaryService } from 'src/providers/cloudinary/cloudinary.service';
+import { CloudinaryService } from '../../providers/cloudinary/cloudinary.service';
 import { QueryDto } from './dto/query.dto';
 import { Response } from 'express';
 
