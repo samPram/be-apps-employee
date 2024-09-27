@@ -1,0 +1,49 @@
+services:
+  postgres:
+    container_name: pg_employee
+    image: postgres
+    environment:
+      POSTGRES_USER: ${POSTGRES_USER:-postgres}
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD:-password}
+      PGDATA: /data/pg_employee
+    volumes:
+      - pg_employee:/data/pg_employee
+    ports:
+      - 5432:5432
+    restart: unless-stopped
+    networks:
+      - public
+
+  be-service:
+    container_name: be-apps-employee
+    build:
+      context: .
+      dockerfile: Dockerfile
+    ports:
+      - 4000:4000 # Replace with desired external port
+    depends_on:
+      - postgres
+    volumes:
+      - ./src:/usr/src/app # Optional: Mount project directory for development
+      - /usr/src/app/node_modules
+    restart: unless-stopped
+    environment:
+      - NODE_ENV=development
+      - PORT=4000
+      - PG_PORT=5432
+      - PG_HOST=postgres
+      - PG_USERNAME=${POSTGRES_USER:-postgres}
+      - PG_PASSWORD=${POSTGRES_PASSWORD:-password}
+      - PG_DBNAME=${POSTGRES_USER:-db_employee}
+      - CD_NAME=${CD_NAME:-dcu3g72ss}
+      - CD_API_KEY=${CD_API_KEY:-381331232727719}
+      - CD_SECRET=${CD_SECRET:-tF6RomV4lhztU0H6Ds92f9rASnc}
+    networks:
+      - public
+
+volumes:
+  pg_employee:
+
+networks:
+  public:
+    driver: bridge
