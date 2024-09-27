@@ -1,6 +1,4 @@
 import { Module } from '@nestjs/common';
-import { AppController } from './app.controller';
-import { AppService } from './app.service';
 import { EmployeeModule } from './models/employee/employee.module';
 import { ProviderPostgreModule } from './providers/database/postgre/postgre.module';
 import { AppConfigModule } from './config/app/config.module';
@@ -20,7 +18,5 @@ import { CloudinaryConfigModule } from './config/coudinary/config.module';
     // Models
     EmployeeModule,
   ],
-  controllers: [AppController],
-  providers: [AppService],
 })
 export class AppModule {}
